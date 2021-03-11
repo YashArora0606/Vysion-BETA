@@ -1,4 +1,4 @@
-secret.json
+src/secret.json
 .env
 eslintrc.json
 certificate.conf

@@ -7,7 +7,7 @@ import "./App.css";
 // e.g. import { drawRect } from "./utilities";
 import { drawRect } from "./utilities";
 
-import * as secret from '../secret.json';
+import * as secret from './secret.json';
 
 import Speech from 'speak-tts' // es6
 import Clarifai from "clarifai";
