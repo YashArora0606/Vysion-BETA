@@ -7,12 +7,14 @@ import "./App.css";
 // e.g. import { drawRect } from "./utilities";
 import { drawRect } from "./utilities";
 
+import * as secret from '../secret.json';
+
 import Speech from 'speak-tts' // es6
 import Clarifai from "clarifai";
 
 import vision from "react-cloud-vision-api";
 
-vision.init({ auth: 'AIzaSyCLm6RqyVqfp1IX5KSp5aIt2I6tQL8uGG0'})
+vision.init({ auth: secret.CloudVisionApiKey })
 
 const clarifai = new Clarifai.App({
   apiKey: '0e8a54fdb85b471b92a80fe9992d30d5'
