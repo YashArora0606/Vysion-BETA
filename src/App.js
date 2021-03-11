@@ -1,30 +1,29 @@
 import React, { useRef, useState, useEffect } from "react";
+import "./App.css";
 import * as tf from "@tensorflow/tfjs";
-// e.g. import * as tfmodel from "@tensorflow-models/tfmodel";
+import * as secret from './secret.json';
 import * as cocossd from "@tensorflow-models/coco-ssd";
 import Webcam from "react-webcam";
-import "./App.css";
-// e.g. import { drawRect } from "./utilities";
-import { drawRect } from "./utilities";
-
-import * as secret from './secret.json';
-
-import Speech from 'speak-tts' // es6
+import Speech from 'speak-tts'
 import Clarifai from "clarifai";
-
 import vision from "react-cloud-vision-api";
 
 vision.init({ auth: secret.CloudVisionApiKey })
 
 const clarifai = new Clarifai.App({
-  apiKey: '0e8a54fdb85b471b92a80fe9992d30d5'
- });
- 
+  apiKey: secret.ClarifaiApiKey
+});
 
 function App() {
   const webcamRef = useRef(null);
-  const canvasRef = useRef(null);
+
   const [videoConstraints, setVideoConstraints] = useState(null);
+
+  const [windowSize, setWindowSize] = useState({
+    width: undefined,
+    height: undefined,
+  });
+
 
   const [lastObj, setLastObj] = useState(null);
 
@@ -80,7 +79,7 @@ function App() {
   }
 
   const detectWithClarifai = async () => {
-    clarifai.models.predict(Clarifai.GENERAL_MODEL, "https://i1.wp.com/www.allstate.com/blog/wp-content/uploads/2019/02/Stop-sign-along-country-road_Getty_cropped.jpg").then(
+    clarifai.models.predict(Clarifai.GENERAL_MODEL, secret.TestImgURL).then(
       function (response) {
         console.log(response.outputs[0].data.concepts);
       },
@@ -98,7 +97,7 @@ function App() {
 
       if (!webcamRef.current.state.hasUserMedia) {
         setVideoConstraints({
-          facingMode: "user"
+          facingMode: "user", aspectRatio: 1
         });
       }
 
@@ -109,27 +108,36 @@ function App() {
       webcamRef.current.video.width = videoWidth;
       webcamRef.current.video.height = videoHeight;
 
-      canvasRef.current.width = videoWidth;
-      canvasRef.current.height = videoHeight;
-
       const obj = await net.detect(video);
 
       setLastObj(obj)
 
-      const ctx = canvasRef.current.getContext("2d");
 
       // drawRect(obj, ctx);
     }
   };
 
-  useEffect(()=>{
-    
+  useEffect(() => {
+
     runCoco();
 
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
     setVideoConstraints({
-      facingMode: { exact: "environment" }
+      facingMode: { exact: "environment" }, aspectRatio: 1
     });
-  
+
+    return () => {
+      window.removeEventListener("resize", handleResize)
+    };
+
   },[]);
 
   return (
@@ -137,31 +145,25 @@ function App() {
         <button onClick={readPrediction}>
           Read what's in this picture
         </button>
-        {/* <button onClick={detectWithClarifai}>
-          Detect with Clarifai  
-        </button> */}
+
         <button onClick={detectWithGoogle}>
           Detect with Google  
         </button>
-        <Webcam
-          ref={webcamRef}
-          mirrored={false}
-          muted={true} 
-          style={{
-            zindex: 9,
-            width: 640,
-            height: 480,
-          }}
-          videoConstraints={videoConstraints}
-        />
-        <canvas
-          ref={canvasRef}
-          style={{
-            zindex: 8,
-            width: 640,
-            height: 480,
-          }}
-        />
+        <div className="webcam-wrapper"> 
+          <Webcam
+            ref={webcamRef}
+            mirrored={false}
+            muted={true} 
+            style={{
+              zindex: 9,
+              width: windowSize.width,
+              height: 480,
+            }}
+            forceScreenshotSourceSize="true"
+            videoConstraints={videoConstraints}
+          />
+        </div>
+
 
     </div>
   );
