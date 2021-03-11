@@ -3359,6 +3359,13 @@
     "kind-of" "^6.0.2"
     "shallow-clone" "^3.0.0"
 
+"cloudsight@^1.1.3":
+  "integrity" "sha512-zzug73jcewcEAIQJDikoPCiAUKDBQ48B+FAQ9zItn+5OyPiqcGgHFqWG4QIMx/d4XmXu4wBVM8JnJPn7ifuxJA=="
+  "resolved" "https://registry.npmjs.org/cloudsight/-/cloudsight-1.1.3.tgz"
+  "version" "1.1.3"
+  dependencies:
+    "httpreq" "^0.4.24"
+
 "co@^4.6.0":
   "integrity" "sha1-bqa989hTrlTMuOR7+gvz+QMfsYQ="
   "resolved" "https://registry.npmjs.org/co/-/co-4.6.0.tgz"
@@ -5841,6 +5848,11 @@
     "assert-plus" "^1.0.0"
     "jsprim" "^1.2.2"
     "sshpk" "^1.7.0"
+
+"httpreq@^0.4.24":
+  "integrity" "sha1-QzX/2CzZaWaKOUZckprGHWOTYn8="
+  "resolved" "https://registry.npmjs.org/httpreq/-/httpreq-0.4.24.tgz"
+  "version" "0.4.24"
 
 "https-browserify@^1.0.0":
   "integrity" "sha1-7AbBDgo0wPL68Zn3/X/Hj//QPHM="

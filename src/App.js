@@ -8,7 +8,16 @@ import Speech from 'speak-tts'
 import Clarifai from "clarifai";
 import vision from "react-cloud-vision-api";
 
-vision.init({ auth: secret.CloudVisionApiKey })
+vision.init({ auth: secret.CloudVisionApiKey });
+
+var cloudsight = require ('cloudsight') ({
+  apikey: '35c205f6bf33ea2c4a573cee2f321fcf'
+});
+ 
+var image = {
+  remote_image_url: '../resources/img1.jpg',
+  locale: 'en-US'
+};
 
 const clarifai = new Clarifai.App({
   apiKey: secret.ClarifaiApiKey
@@ -18,6 +27,9 @@ function App() {
   const webcamRef = useRef(null);
 
   const [videoConstraints, setVideoConstraints] = useState(null);
+  const [objectPredictions, setObjectPredictions] = useState(null);
+  const [textPredictions, setTextPredictions] = useState(null);
+
 
   const [windowSize, setWindowSize] = useState({
     width: undefined,
@@ -25,25 +37,25 @@ function App() {
   });
 
 
-  const [lastObj, setLastObj] = useState(null);
+  // const [lastObj, setLastObj] = useState(null);
 
-  const runCoco = async () => {
-    const net = await cocossd.load();
-    setInterval(() => {
-      detect(net);
-    }, 10);
-  };
+  // const runCoco = async () => {
+  //   const net = await cocossd.load();
+  //   setInterval(() => {
+  //     detect(net);
+  //   }, 10);
+  // };
 
-  const readPrediction = async () => {
-    const speech = new Speech() // will throw an exception if not browser supported
+  // const readPrediction = async () => {
+  //   const speech = new Speech() // will throw an exception if not browser supported
 
-    lastObj.forEach(prediction => {
-      const guess = prediction['class'];
-      speech.speak({
-        text: guess,
-      })
-    })
-  }
+  //   lastObj.forEach(prediction => {
+  //     const guess = prediction['class'];
+  //     speech.speak({
+  //       text: guess,
+  //     })
+  //   })
+  // }
 
   const readPredictions = async (predictions) => {
     const speech = new Speech() // will throw an exception if not browser supported
@@ -71,84 +83,90 @@ function App() {
     console.log(req)
     vision.annotate(req).then((res) => {
       console.log(res.responses[0].labelAnnotations)
-      readPredictions(res.responses[0].labelAnnotations)
       console.log(res.responses[0].textAnnotations)
+      setObjectPredictions(res.responses[0].labelAnnotations);
+      setTextPredictions(res.responses[0].textAnnotations);
     }, (e) => {
       console.log('Error: ', e)
+    }).then(() => {
+      // readPredictions(textPredictions)
     })
   }
 
-  const detectWithClarifai = async () => {
-    clarifai.models.predict(Clarifai.GENERAL_MODEL, secret.TestImgURL).then(
-      function (response) {
-        console.log(response.outputs[0].data.concepts);
-      },
-      function (err) {
-      }
-    );
-  }
+  // const detectWithClarifai = async () => {
+  //   clarifai.models.predict(Clarifai.GENERAL_MODEL, secret.TestImgURL).then(
+  //     function (response) {
+  //       console.log(response.outputs[0].data.concepts);
+  //     },
+  //     function (err) {
+  //     }
+  //   );
+  // }
 
-  const detect = async (net) => {
-    if (
-      typeof webcamRef.current !== "undefined" &&
-      webcamRef.current !== null &&
-      webcamRef.current.video.readyState === 4
-    ) {
+  // const detect = async (net) => {
+  //   if (
+  //     typeof webcamRef.current !== "undefined" &&
+  //     webcamRef.current !== null &&
+  //     webcamRef.current.video.readyState === 4
+  //   ) {
 
-      if (!webcamRef.current.state.hasUserMedia) {
-        setVideoConstraints({
-          facingMode: "user", aspectRatio: 1
-        });
-      }
+  //     if (!webcamRef.current.state.hasUserMedia) {
+  //       setVideoConstraints({
+  //         facingMode: "user", aspectRatio: 1
+  //       });
+  //     }
 
-      const video = webcamRef.current.video;
-      const videoWidth = webcamRef.current.video.videoWidth;
-      const videoHeight = webcamRef.current.video.videoHeight;
+  //     const video = webcamRef.current.video;
+  //     const videoWidth = webcamRef.current.video.videoWidth;
+  //     const videoHeight = webcamRef.current.video.videoHeight;
 
-      webcamRef.current.video.width = videoWidth;
-      webcamRef.current.video.height = videoHeight;
+  //     webcamRef.current.video.width = videoWidth;
+  //     webcamRef.current.video.height = videoHeight;
 
-      const obj = await net.detect(video);
-
-      setLastObj(obj)
-
-
-      // drawRect(obj, ctx);
-    }
-  };
+  //     // const obj = await net.detect(video);
+  //     // setLastObj(obj)
+  //     // drawRect(obj, ctx);
+  //   }
+  // };
 
   useEffect(() => {
 
-    runCoco();
+    // runCoco();
 
     function handleResize() {
+
+      console.log(window.innerWidth)
+      
       setWindowSize({
         width: window.innerWidth,
         height: window.innerHeight,
       });
     }
     window.addEventListener("resize", handleResize);
+
     handleResize();
 
     setVideoConstraints({
       facingMode: { exact: "environment" }, aspectRatio: 1
     });
+    console.log("setting to outer cam")
+
+    if (!webcamRef.current.state.hasUserMedia) {
+      setVideoConstraints({
+        facingMode: "user", aspectRatio: 1
+      });
+      console.log("setting to inner cam")
+
+    }
 
     return () => {
       window.removeEventListener("resize", handleResize)
     };
 
-  },[]);
+  },[webcamRef]);
 
   return (
     <div className="App">
-        <button onClick={readPrediction}>
-          Read what's in this picture
-        </button>
-
-        <button onClick={detectWithGoogle}>
-          Detect with Google  
-        </button>
         <div className="webcam-wrapper"> 
           <Webcam
             ref={webcamRef}
@@ -156,12 +174,21 @@ function App() {
             muted={true} 
             style={{
               zindex: 9,
-              width: windowSize.width,
-              height: 480,
+              width: windowSize.width > 480 ? 480 : windowSize.width,
+              height: windowSize.width > 480 ? 480 : windowSize.width,
+              borderRadius: "10%"
             }}
             forceScreenshotSourceSize="true"
             videoConstraints={videoConstraints}
           />
+        </div>
+        <div className="">
+
+        </div>
+        <div>
+          <button>
+            <img src="../resources/img1.jpg" alt="Make Detection" onClick={detectWithGoogle} />
+          </button>
         </div>
 
 
