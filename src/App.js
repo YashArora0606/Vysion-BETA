@@ -13,6 +13,7 @@ import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
 import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
+import { SignalCellularNull } from "@material-ui/icons";
 
 
 vision.init({ auth: secret.CloudVisionApiKey });
@@ -35,8 +36,9 @@ function App() {
 
   const [videoConstraints, setVideoConstraints] = useState(null);
   const [objectPredictions, setObjectPredictions] = useState([]);
-  const [textPredictions, setTextPredictions] = useState(null);
-  const [textToSpeech, setTextToSpeech] = useState(false);
+  const [textPredictions, setTextPredictions] = useState([]);
+  const [fullTextPrediction, setFullTextPrediction] = useState("No prediction made.");
+  const [textToSpeech, setTextToSpeech] = useState(true);
 
 
   const [windowSize, setWindowSize] = useState({
@@ -76,6 +78,13 @@ function App() {
     })
   }
 
+  const readPrediction = async (guess) => {
+    const speech = new Speech() // will throw an exception if not browser supported
+    speech.speak({
+      text: guess,
+    })
+  }
+
   const detectWithGoogle = async() => {
     const b64 = webcamRef.current.getScreenshot();
 
@@ -88,19 +97,18 @@ function App() {
         new vision.Feature('LABEL_DETECTION', 10),
       ]
     });
-    console.log(req)
+    // console.log(req)
     vision.annotate(req).then((res) => {
-      console.log(res.responses[0].labelAnnotations)
-      console.log(res.responses[0].textAnnotations)
+      // console.log(res.responses[0].labelAnnotations)
+      // console.log(res.responses[0].textAnnotations)
+      console.log(res.responses)
       setObjectPredictions(res.responses[0].labelAnnotations);
       setTextPredictions(res.responses[0].textAnnotations);
+      setFullTextPrediction(res.responses[0].fullTextAnnotation.text)
+      readPrediction(res.responses[0].fullTextAnnotation.text)
     }, (e) => {
       console.log('Error: ', e)
-    }).then(() => {
-      if (textToSpeech) {
-        readPredictions(objectPredictions)
-      }
-    })
+    });
   }
 
   // const detectWithClarifai = async () => {
@@ -149,7 +157,7 @@ function App() {
 
     function handleResize() {
 
-      console.log(window.innerWidth)
+      // console.log(window.innerWidth)
       
       setWindowSize({
         width: window.innerWidth,
@@ -163,13 +171,13 @@ function App() {
     setVideoConstraints({
       facingMode: { exact: "environment" }, aspectRatio: 1
     });
-    console.log("setting to outer cam")
+    // console.log("setting to outer cam")
 
     if (!webcamRef.current.state.hasUserMedia) {
       setVideoConstraints({
         facingMode: "user", aspectRatio: 1
       });
-      console.log("setting to inner cam")
+      // console.log("setting to inner cam")
 
     }
 
@@ -182,7 +190,7 @@ function App() {
   return (
     <div className="App">
         <div className="header">
-          <p>SOME TEXT HERE</p>
+          <p>Vysion2 BETA</p>
         </div>
         <div className="webcam-wrapper"> 
           <Webcam
@@ -208,20 +216,23 @@ function App() {
           </label>
         </div> */}
         <div>
-            {objectPredictions.map((prediction) => {
+            {/* {objectPredictions.map((prediction) => {
               return <p>{prediction.description}</p>;
-            })}
+            })} */}
+            <p>
+              {fullTextPrediction}
+            </p>
         </div>
         <div>
           <Button
             size="large"
             variant="contained"
-            color="grey"
+            color="default"
             className={"button"}
             startIcon={<KeyboardVoiceIcon />}
             onClick={detectWithGoogle}
           >
-            Detect
+            Read Text
           </Button>
         </div>
 
