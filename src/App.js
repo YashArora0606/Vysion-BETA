@@ -7,6 +7,13 @@ import Webcam from "react-webcam";
 import Speech from 'speak-tts'
 import Clarifai from "clarifai";
 import vision from "react-cloud-vision-api";
+import Toggle from 'react-toggle'
+
+import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
+import Icon from '@material-ui/core/Icon';
+import Button from '@material-ui/core/Button';
+import { makeStyles } from '@material-ui/core/styles';
+
 
 vision.init({ auth: secret.CloudVisionApiKey });
 
@@ -27,8 +34,9 @@ function App() {
   const webcamRef = useRef(null);
 
   const [videoConstraints, setVideoConstraints] = useState(null);
-  const [objectPredictions, setObjectPredictions] = useState(null);
+  const [objectPredictions, setObjectPredictions] = useState([]);
   const [textPredictions, setTextPredictions] = useState(null);
+  const [textToSpeech, setTextToSpeech] = useState(false);
 
 
   const [windowSize, setWindowSize] = useState({
@@ -89,7 +97,9 @@ function App() {
     }, (e) => {
       console.log('Error: ', e)
     }).then(() => {
-      // readPredictions(textPredictions)
+      if (textToSpeech) {
+        readPredictions(objectPredictions)
+      }
     })
   }
 
@@ -129,6 +139,10 @@ function App() {
   //   }
   // };
 
+  const toggleTextToSpeech = () => {
+    setTextToSpeech(!textToSpeech);
+  }
+
   useEffect(() => {
 
     // runCoco();
@@ -167,6 +181,9 @@ function App() {
 
   return (
     <div className="App">
+        <div className="header">
+          <p>SOME TEXT HERE</p>
+        </div>
         <div className="webcam-wrapper"> 
           <Webcam
             ref={webcamRef}
@@ -176,20 +193,38 @@ function App() {
               zindex: 9,
               width: windowSize.width > 480 ? 480 : windowSize.width,
               height: windowSize.width > 480 ? 480 : windowSize.width,
-              borderRadius: "10%"
             }}
             forceScreenshotSourceSize="true"
             videoConstraints={videoConstraints}
           />
         </div>
-        <div className="">
-
+        {/* <div>
+          <label>
+            <Toggle
+              defaultChecked={textToSpeech}
+              icons={false}
+              onChange={toggleTextToSpeech} />
+            <span>Text to Speech</span>
+          </label>
+        </div> */}
+        <div>
+            {objectPredictions.map((prediction) => {
+              return <p>{prediction.description}</p>;
+            })}
         </div>
         <div>
-          <button>
-            <img src="../resources/img1.jpg" alt="Make Detection" onClick={detectWithGoogle} />
-          </button>
+          <Button
+            size="large"
+            variant="contained"
+            color="grey"
+            className={"button"}
+            startIcon={<KeyboardVoiceIcon />}
+            onClick={detectWithGoogle}
+          >
+            Detect
+          </Button>
         </div>
+
 
 
     </div>

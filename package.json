@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^4.11.3",
+    "@material-ui/icons": "^4.11.2",
+    "@material/icon-button": "^10.0.0",
     "@tensorflow-models/coco-ssd": "^2.1.0",
     "@tensorflow/tfjs": "^2.4.0",
     "@testing-library/jest-dom": "^4.2.4",
@@ -17,6 +20,7 @@
     "react-dom": "^16.13.1",
     "react-native-tts": "^3.3.0",
     "react-scripts": "3.4.3",
+    "react-toggle": "^4.1.1",
     "react-webcam": "^5.2.0",
     "react-webcam-mirror": "^1.0.7",
     "speak-tts": "^2.0.8"
