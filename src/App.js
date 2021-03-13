@@ -9,7 +9,7 @@ import Clarifai from "clarifai";
 import vision from "react-cloud-vision-api";
 import Toggle from 'react-toggle'
 
-import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
+import VisibilityRoundedIcon from '@material-ui/icons/VisibilityRounded';
 import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
@@ -99,13 +99,23 @@ function App() {
     });
     // console.log(req)
     vision.annotate(req).then((res) => {
-      // console.log(res.responses[0].labelAnnotations)
-      // console.log(res.responses[0].textAnnotations)
       console.log(res.responses)
-      setObjectPredictions(res.responses[0].labelAnnotations);
-      setTextPredictions(res.responses[0].textAnnotations);
-      setFullTextPrediction(res.responses[0].fullTextAnnotation.text)
-      readPrediction(res.responses[0].fullTextAnnotation.text)
+
+      if (typeof res.responses !== 'undefined' && res.responses.length > 0) {
+
+        const resp = res.responses[0];
+
+        if (typeof resp.labelAnnotations !== 'undefined') {
+          setObjectPredictions(res.responses[0].labelAnnotations);
+        } 
+        if (typeof resp.textAnnotations !== 'undefined') {
+          setTextPredictions(res.responses[0].textAnnotations);
+        }
+        if (typeof resp.fullTextAnnotation !== 'undefined') {
+          setFullTextPrediction(res.responses[0].fullTextAnnotation.text)
+          readPrediction(res.responses[0].fullTextAnnotation.text)
+        }
+      }      
     }, (e) => {
       console.log('Error: ', e)
     });
@@ -206,7 +216,7 @@ function App() {
             videoConstraints={videoConstraints}
           />
         </div>
-        {/* <div>
+        <div>
           <label>
             <Toggle
               defaultChecked={textToSpeech}
@@ -214,13 +224,15 @@ function App() {
               onChange={toggleTextToSpeech} />
             <span>Text to Speech</span>
           </label>
-        </div> */}
+        </div>
         <div>
-            {/* {objectPredictions.map((prediction) => {
-              return <p>{prediction.description}</p>;
-            })} */}
             <p>
               {fullTextPrediction}
+            </p>
+            <p>
+              {objectPredictions.map((object) => {
+                return <span key={object.description}>{object.description}</span>
+              })}
             </p>
         </div>
         <div>
@@ -229,7 +241,7 @@ function App() {
             variant="contained"
             color="default"
             className={"button"}
-            startIcon={<KeyboardVoiceIcon />}
+            startIcon={<VisibilityRoundedIcon />}
             onClick={detectWithGoogle}
           >
             Read Text
