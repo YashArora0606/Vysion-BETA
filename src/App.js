@@ -1,44 +1,43 @@
 import React, { useRef, useState, useEffect } from "react";
 import "./App.css";
-import * as tf from "@tensorflow/tfjs";
+// import * as tf from "@tensorflow/tfjs";
 import * as secret from './secret.json';
-import * as cocossd from "@tensorflow-models/coco-ssd";
+// import * as cocossd from "@tensorflow-models/coco-ssd";
 import Webcam from "react-webcam";
 import Speech from 'speak-tts'
-import Clarifai from "clarifai";
+// import Clarifai from "clarifai";
 import vision from "react-cloud-vision-api";
-import Toggle from 'react-toggle'
+// import Toggle from 'react-toggle'
 
 import VisibilityRoundedIcon from '@material-ui/icons/VisibilityRounded';
-import Icon from '@material-ui/core/Icon';
+// import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
-import { makeStyles } from '@material-ui/core/styles';
-import { SignalCellularNull } from "@material-ui/icons";
+// import { makeStyles } from '@material-ui/core/styles';
+// import { SignalCellularNull } from "@material-ui/icons";
+import Logo from "./logo.png"
+
 
 
 vision.init({ auth: secret.CloudVisionApiKey });
 
-var cloudsight = require ('cloudsight') ({
-  apikey: '35c205f6bf33ea2c4a573cee2f321fcf'
-});
- 
-var image = {
-  remote_image_url: '../resources/img1.jpg',
-  locale: 'en-US'
-};
-
-const clarifai = new Clarifai.App({
-  apiKey: secret.ClarifaiApiKey
-});
+// var cloudsight = require ('cloudsight') ({
+//   apikey: '35c205f6bf33ea2c4a573cee2f321fcf'
+// });
+// var image = {
+//   remote_image_url: '../resources/img1.jpg',
+//   locale: 'en-US'
+// };
+// const clarifai = new Clarifai.App({
+//   apiKey: secret.ClarifaiApiKey
+// });
 
 function App() {
   const webcamRef = useRef(null);
 
   const [videoConstraints, setVideoConstraints] = useState(null);
-  const [objectPredictions, setObjectPredictions] = useState([]);
-  const [textPredictions, setTextPredictions] = useState([]);
-  const [fullTextPrediction, setFullTextPrediction] = useState("No prediction made.");
-  const [textToSpeech, setTextToSpeech] = useState(true);
+  const [objectPredictions, setObjectPredictions] = useState("No detections made.");
+  const [fullTextPrediction, setFullTextPrediction] = useState("No detections made.");
+  const [textToSpeech, setTextToSpeech] = useState(false);
 
 
   const [windowSize, setWindowSize] = useState({
@@ -46,43 +45,13 @@ function App() {
     height: undefined,
   });
 
-
-  // const [lastObj, setLastObj] = useState(null);
-
-  // const runCoco = async () => {
-  //   const net = await cocossd.load();
-  //   setInterval(() => {
-  //     detect(net);
-  //   }, 10);
-  // };
-
-  // const readPrediction = async () => {
-  //   const speech = new Speech() // will throw an exception if not browser supported
-
-  //   lastObj.forEach(prediction => {
-  //     const guess = prediction['class'];
-  //     speech.speak({
-  //       text: guess,
-  //     })
-  //   })
-  // }
-
-  const readPredictions = async (predictions) => {
-    const speech = new Speech() // will throw an exception if not browser supported
-
-    predictions.forEach(prediction => {
-      const guess = prediction.description;
+  const readPrediction = async (guess) => {
+    if (textToSpeech) {
+      const speech = new Speech()
       speech.speak({
         text: guess,
-      })
-    })
-  }
-
-  const readPrediction = async (guess) => {
-    const speech = new Speech() // will throw an exception if not browser supported
-    speech.speak({
-      text: guess,
-    })
+      });
+    }
   }
 
   const detectWithGoogle = async() => {
@@ -97,8 +66,8 @@ function App() {
         new vision.Feature('LABEL_DETECTION', 10),
       ]
     });
-    // console.log(req)
     vision.annotate(req).then((res) => {
+
       console.log(res.responses)
 
       if (typeof res.responses !== 'undefined' && res.responses.length > 0) {
@@ -106,14 +75,26 @@ function App() {
         const resp = res.responses[0];
 
         if (typeof resp.labelAnnotations !== 'undefined') {
-          setObjectPredictions(res.responses[0].labelAnnotations);
-        } 
-        if (typeof resp.textAnnotations !== 'undefined') {
-          setTextPredictions(res.responses[0].textAnnotations);
+
+          var result = resp.labelAnnotations[0].description;
+          for (var i = 1; i < resp.labelAnnotations.length; i++) {
+            result += ", " + resp.labelAnnotations[i].description;
+          }
+          setObjectPredictions(result);
+        } else {
+          const noObjects = "No objects in this image."
+          setObjectPredictions(noObjects)
         }
+
+
         if (typeof resp.fullTextAnnotation !== 'undefined') {
-          setFullTextPrediction(res.responses[0].fullTextAnnotation.text)
-          readPrediction(res.responses[0].fullTextAnnotation.text)
+          var result = resp.fullTextAnnotation.text.replace(/\n/g, ", ");
+          setFullTextPrediction(result)
+          readPrediction(result)
+        } else {
+          const noText = "No text in this image."
+          setFullTextPrediction(noText)
+          readPrediction(noText)
         }
       }      
     }, (e) => {
@@ -121,59 +102,19 @@ function App() {
     });
   }
 
-  // const detectWithClarifai = async () => {
-  //   clarifai.models.predict(Clarifai.GENERAL_MODEL, secret.TestImgURL).then(
-  //     function (response) {
-  //       console.log(response.outputs[0].data.concepts);
-  //     },
-  //     function (err) {
-  //     }
-  //   );
-  // }
-
-  // const detect = async (net) => {
-  //   if (
-  //     typeof webcamRef.current !== "undefined" &&
-  //     webcamRef.current !== null &&
-  //     webcamRef.current.video.readyState === 4
-  //   ) {
-
-  //     if (!webcamRef.current.state.hasUserMedia) {
-  //       setVideoConstraints({
-  //         facingMode: "user", aspectRatio: 1
-  //       });
-  //     }
-
-  //     const video = webcamRef.current.video;
-  //     const videoWidth = webcamRef.current.video.videoWidth;
-  //     const videoHeight = webcamRef.current.video.videoHeight;
-
-  //     webcamRef.current.video.width = videoWidth;
-  //     webcamRef.current.video.height = videoHeight;
-
-  //     // const obj = await net.detect(video);
-  //     // setLastObj(obj)
-  //     // drawRect(obj, ctx);
-  //   }
-  // };
-
   const toggleTextToSpeech = () => {
     setTextToSpeech(!textToSpeech);
   }
 
   useEffect(() => {
 
-    // runCoco();
-
-    function handleResize() {
-
-      // console.log(window.innerWidth)
-      
+    function handleResize() {      
       setWindowSize({
         width: window.innerWidth,
         height: window.innerHeight,
       });
     }
+
     window.addEventListener("resize", handleResize);
 
     handleResize();
@@ -181,14 +122,14 @@ function App() {
     setVideoConstraints({
       facingMode: { exact: "environment" }, aspectRatio: 1
     });
-    // console.log("setting to outer cam")
 
     if (!webcamRef.current.state.hasUserMedia) {
+      // setVideoConstraints({
+      //   facingMode: "user", aspectRatio: 1
+      // });
       setVideoConstraints({
-        facingMode: "user", aspectRatio: 1
+        facingMode: { exact: "environment" }, aspectRatio: 1
       });
-      // console.log("setting to inner cam")
-
     }
 
     return () => {
@@ -200,10 +141,14 @@ function App() {
   return (
     <div className="App">
         <div className="header">
-          <p>Vysion2 BETA</p>
+          <img className="photo" src={Logo} alt=""/>
+          {/* <div className="title">
+            Vysion
+          </div> */}
         </div>
         <div className="webcam-wrapper"> 
           <Webcam
+            className="webcam"
             ref={webcamRef}
             mirrored={false}
             muted={true} 
@@ -216,7 +161,7 @@ function App() {
             videoConstraints={videoConstraints}
           />
         </div>
-        <div>
+        {/* <div>
           <label>
             <Toggle
               defaultChecked={textToSpeech}
@@ -224,18 +169,8 @@ function App() {
               onChange={toggleTextToSpeech} />
             <span>Text to Speech</span>
           </label>
-        </div>
-        <div>
-            <p>
-              {fullTextPrediction}
-            </p>
-            <p>
-              {objectPredictions.map((object) => {
-                return <span key={object.description}>{object.description}</span>
-              })}
-            </p>
-        </div>
-        <div>
+        </div> */}
+        <div className="detect">
           <Button
             size="large"
             variant="contained"
@@ -244,11 +179,31 @@ function App() {
             startIcon={<VisibilityRoundedIcon />}
             onClick={detectWithGoogle}
           >
-            Read Text
+            Detect
           </Button>
         </div>
-
-
+        <div className="predictions">
+            <p>
+              <b>Text:<br></br></b>
+              {fullTextPrediction}
+            </p>
+            <p>
+              <b>Objects:<br></br></b>
+              {objectPredictions}
+            </p>
+            {/* <ul>
+              {objectPredictions.map((object) => {
+                return <li key={object.description}>{object.description}</li>
+              })}
+            </ul> */}
+        </div>
+        <div className="footer">
+          <p>
+            Made with ❤️ and ☕
+            <br></br>
+            © Yash Arora 2021
+          </p>
+        </div>
 
     </div>
   );

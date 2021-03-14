@@ -6,3 +6,5 @@ certificate.crt
 certificate.key
 node_modules/
 build/
+# Local Netlify folder
+.netlify
