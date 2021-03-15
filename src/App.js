@@ -119,16 +119,13 @@ function App() {
 
     handleResize();
 
-    setVideoConstraints({
-      facingMode: { exact: "environment" }, aspectRatio: 1
-    });
+    // setVideoConstraints({
+    //   facingMode: { exact: "environment" }, aspectRatio: 1
+    // });
 
     if (!webcamRef.current.state.hasUserMedia) {
-      // setVideoConstraints({
-      //   facingMode: "user", aspectRatio: 1
-      // });
       setVideoConstraints({
-        facingMode: { exact: "environment" }, aspectRatio: 1
+        facingMode: "user", aspectRatio: 1
       });
     }
 
