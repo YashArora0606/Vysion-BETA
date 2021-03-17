@@ -5,6 +5,8 @@ Welcome to Vysion! We're currently in BETA, so feel free to contact if you're in
 Vysion (BETA) demo is available at vysion.live
 
 ## Installation
+npm i
+npm start
 
 ## License
 MIT License
