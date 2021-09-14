@@ -167,7 +167,13 @@ function App() {
             <span>Text to Speech</span>
           </label>
         </div> */}
-        <div className="detect">
+        <div className="predictions">
+            <p>
+              <b>Unfortunately, some dependencies for Vysion have been depricated 😞. <br></br> Don't worry though, we're coming back better than ever on iOS by mid October!<br></br></b>
+            </p>
+
+        </div>
+        {/* <div className="detect">
           <Button
             size="large"
             variant="contained"
@@ -178,8 +184,8 @@ function App() {
           >
             Detect
           </Button>
-        </div>
-        <div className="predictions">
+        </div> */}
+        {/* <div className="predictions">
             <p>
               <b>Text:<br></br></b>
               {fullTextPrediction}
@@ -188,12 +194,7 @@ function App() {
               <b>Objects:<br></br></b>
               {objectPredictions}
             </p>
-            {/* <ul>
-              {objectPredictions.map((object) => {
-                return <li key={object.description}>{object.description}</li>
-              })}
-            </ul> */}
-        </div>
+        </div> */}
         <div className="footer">
           <p>
             Made with ❤️ and ☕
