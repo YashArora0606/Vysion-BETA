@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import "./App.css";
 // import * as tf from "@tensorflow/tfjs";
-import * as secret from './secret.json';
+// import * as secret from './secret.json';
 // import * as cocossd from "@tensorflow-models/coco-ssd";
 import Webcam from "react-webcam";
 import Speech from 'speak-tts'
@@ -18,7 +18,7 @@ import Logo from "./logo.png"
 
 
 
-vision.init({ auth: secret.CloudVisionApiKey });
+// vision.init({ auth: secret.CloudVisionApiKey });
 
 // var cloudsight = require ('cloudsight') ({
 //   apikey: '35c205f6bf33ea2c4a573cee2f321fcf'
