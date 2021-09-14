@@ -11,7 +11,7 @@ import vision from "react-cloud-vision-api";
 
 import VisibilityRoundedIcon from '@material-ui/icons/VisibilityRounded';
 // import Icon from '@material-ui/core/Icon';
-import Button from '@material-ui/core/Button';
+// import Button from '@material-ui/core/Button';
 // import { makeStyles } from '@material-ui/core/styles';
 // import { SignalCellularNull } from "@material-ui/icons";
 import Logo from "./logo.png"
